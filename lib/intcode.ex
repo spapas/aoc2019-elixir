@@ -22,10 +22,10 @@ defmodule Intcode do
     modes = get_modes(div(op_modes, 100), %{}, 0)
 
     case op do
-      99 ->
+      99 -> # halt
         progr
 
-      1 ->
+      1 -> # add
         p1 = get_param_value(progr, pc, modes, 1)
         p2 = get_param_value(progr, pc, modes, 2)
         #p1 = Map.get(progr, pc + 1)
@@ -34,23 +34,60 @@ defmodule Intcode do
         new_progr = progr |> Map.put(p3, p1 + p2)
         runner(new_progr, pc + 4)
 
-      2 ->
+      2 -> # mult
         p1 = get_param_value(progr, pc, modes, 1)
         p2 = get_param_value(progr, pc, modes, 2)
         p3 = Map.get(progr, pc + 3)
         new_progr = progr |> Map.put(p3, p1*p2)
         runner(new_progr, pc + 4)
-      3 ->
+      3 -> # input
         i = IO.gets("Enter input: ") |> String.trim |> String.to_integer
         p1 = Map.get(progr, pc + 1)
         new_progr = progr |> Map.put(p1, i)
         runner(new_progr, pc + 2)
-      4 ->
+      4 -> # output
         p1 = Map.get(progr, pc + 1)
-
         IO.inspect("OUTPUT: ")
         IO.inspect(Map.get(progr, p1))
         runner(progr, pc + 2)
+      5 -> # jump if true
+        p1 = get_param_value(progr, pc, modes, 1)
+        p2 = get_param_value(progr, pc, modes, 2)
+        if p1 != 0 do
+          runner(progr, p2)
+        else
+          runner(progr, pc + 3)
+        end
+      6 -> # jump if false
+        p1 = get_param_value(progr, pc, modes, 1)
+        p2 = get_param_value(progr, pc, modes, 2)
+        if p1 == 0 do
+          runner(progr, p2)
+        else
+          runner(progr, pc + 3)
+        end
+      7 -> # less than
+        p1 = get_param_value(progr, pc, modes, 1)
+        p2 = get_param_value(progr, pc, modes, 2)
+        p3 = Map.get(progr, pc + 3)
+
+        new_progr = if p1 < p2 do
+          progr |> Map.put(p3, 1)
+        else
+          progr |> Map.put(p3, 0)
+        end
+        runner(new_progr, pc + 4)
+      8 -> # eq
+        p1 = get_param_value(progr, pc, modes, 1)
+        p2 = get_param_value(progr, pc, modes, 2)
+        p3 = Map.get(progr, pc + 3)
+
+        new_progr = if p1 == p2 do
+          progr |> Map.put(p3, 1)
+        else
+          progr |> Map.put(p3, 0)
+        end
+        runner(new_progr, pc + 4)
       end
   end
 

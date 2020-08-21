@@ -6,4 +6,11 @@ defmodule Day5 do
     # give 1 as input
     Intcode.runner(prog, 0)
   end
+
+
+  def day5b() do
+    prog = read_program("day5.txt")
+    # give 5 as input
+    Intcode.runner(prog, 0)
+  end
 end
