@@ -40,13 +40,23 @@ defmodule Intcode do
         p3 = Map.get(progr, pc + 3)
         new_progr = progr |> Map.put(p3, p1*p2)
         runner(new_progr, pc + 4)
-    end
+      3 ->
+        i = IO.gets("Enter input: ") |> String.trim |> String.to_integer
+        p1 = Map.get(progr, pc + 1)
+        new_progr = progr |> Map.put(p1, i)
+        runner(new_progr, pc + 2)
+      4 ->
+        p1 = Map.get(progr, pc + 1)
+
+        IO.inspect("OUTPUT: ")
+        IO.inspect(Map.get(progr, p1))
+        runner(progr, pc + 2)
+      end
   end
-
-
 
   def read_program(input) do
     File.read!(input)
+    |> String.trim()
     |> String.split(",")
     |> Enum.with_index
     |> Enum.map(fn {f,s} -> {s, String.to_integer(f)} end)
