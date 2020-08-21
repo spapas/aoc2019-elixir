@@ -46,9 +46,10 @@ defmodule Intcode do
         new_progr = progr |> Map.put(p1, i)
         runner(new_progr, pc + 2)
       4 -> # output
-        p1 = Map.get(progr, pc + 1)
+        p1 = get_param_value(progr, pc, modes, 1)
+        IO.inspect(pc)
         IO.inspect("OUTPUT: ")
-        IO.inspect(Map.get(progr, p1))
+        IO.inspect(p1)
         runner(progr, pc + 2)
       5 -> # jump if true
         p1 = get_param_value(progr, pc, modes, 1)
