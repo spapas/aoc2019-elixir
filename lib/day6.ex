@@ -1,21 +1,21 @@
 defmodule Day6 do
   @test_input """
-COM)B
-B)C
-C)D
-D)E
-E)F
-B)G
-G)H
-D)I
-E)J
-J)K
-K)L
-"""
+  COM)B
+  B)C
+  C)D
+  D)E
+  E)F
+  B)G
+  G)H
+  D)I
+  E)J
+  J)K
+  K)L
+  """
   def input_to_tuples(inp) do
-   inp
-         |> String.split()
-    |> Enum.map(&(String.split(&1, ")") |> List.to_tuple))
+    inp
+    |> String.split()
+    |> Enum.map(&(String.split(&1, ")") |> List.to_tuple()))
   end
 
   def prepare_test_input() do
@@ -35,19 +35,17 @@ K)L
     prepared_input |> Enum.map(fn {_k, v} -> v end) |> MapSet.new()
   end
 
-  def make_dist_reducer(input_map) do
-    fn (el, acc) -> acc end
+  def count_distance("COM", acc, _input_map), do: acc
+  def count_distance(el, acc, input_map) do
+    count_distance(Map.get(input_map, el), acc+1, input_map)
   end
 
   def day6() do
     input = read_input()
     input_map = input |> make_input_map()
     input_set = input |> make_input_set()
-    dist_reducer = make_dist_reducer(input_map)
-    input_set |> Enum.reduce(dist_reducer)
-
+    input_set |> Enum.map(&(count_distance(&1, 0, input_map))) |> Enum.sum
   end
-
 
   def day6b() do
   end
