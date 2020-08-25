@@ -8,9 +8,16 @@ defmodule Day7 do
   end
 
 
-  def day57() do
+  def day7() do
     prog = read_program("day7.txt")
-    # give 5 as input
     Intcode.runner(prog, 0)
+  end
+
+
+  def permutations([]), do: [[]]
+  def permutations(list) do
+    for elem <- list, rest <- permutations(list--[elem]) do
+      [elem|rest]
+    end
   end
 end
