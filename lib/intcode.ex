@@ -47,7 +47,6 @@ defmodule Intcode do
         runner(new_progr, pc + 2)
       4 -> # output
         p1 = get_param_value(progr, pc, modes, 1)
-        IO.inspect(pc)
         IO.inspect("OUTPUT: ")
         IO.inspect(p1)
         runner(progr, pc + 2)
