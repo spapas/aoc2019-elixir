@@ -17,12 +17,14 @@ defmodule Intcode do
   end
 
   def runner(progr, pc, options \\ []) do
+    IO.puts("Starting runner with opts = #{options|>inspect}")
     op_modes = progr |> Map.get(pc)
     op = get_op(op_modes)
     modes = get_modes(div(op_modes, 100), %{}, 0)
 
     case op do
       99 -> # halt
+        IO.puts("HALT")
         {Keyword.get(options, :output, []) |> Enum.reverse, progr}
 
       1 -> # add
@@ -41,27 +43,34 @@ defmodule Intcode do
         new_progr = progr |> Map.put(p3, p1*p2)
         runner(new_progr, pc + 4, options)
       3 -> # input
+        the_input = Keyword.get(options, :input)
+        IO.puts("Here's the input #{the_input|>inspect()}!")
+        if Enum.count(the_input) > 0 do
+          {i, new_options} = if the_input  do
+            {
+              hd(the_input),
+              Keyword.update!(options, :input, &tl/1 )
+            }
 
-        {i, new_options} = if Keyword.get(options, :input) |> IO.inspect do
-          {
-            hd(Keyword.get(options, :input)),
-            Keyword.update!(options, :input, &tl/1 )
-          } |> IO.inspect
+          else
+            {
+              IO.gets("Enter input: ") |> String.trim |> String.to_integer,
+              []
+            }
+          end
+          IO.puts("So i retr this input #{i}")
 
+          p1 = Map.get(progr, pc + 1)
+          new_progr = progr |> Map.put(p1, i)
+          runner(new_progr, pc + 2, new_options)
         else
-          {
-            IO.gets("Enter input: ") |> String.trim |> String.to_integer,
-            []
-          }
+          IO.puts("Will block waiting ...")
+          {:block, progr, pc, options}
         end
-
-        p1 = Map.get(progr, pc + 1)
-        new_progr = progr |> Map.put(p1, i)
-        runner(new_progr, pc + 2, new_options)
       4 -> # output
         p1 = get_param_value(progr, pc, modes, 1)
-        IO.inspect("OUTPUT: ")
-        IO.inspect(p1)
+        IO.puts("OUTPUT : #{p1}")
+
         new_options = options |> Keyword.update(:output, [p1], &([p1 | &1]))
         runner(progr, pc + 2, new_options)
       5 -> # jump if true
