@@ -17,8 +17,25 @@ defmodule Day8 do
 
   end
 
-  def day8b() do
+  def layer_reducer(layer, acc) do
+    Enum.zip(layer, acc) |> Enum.map(fn {l,a} ->
+      if a == 2, do: l, else: a
+    end)
+  end
 
+  def day8b() do
+    layers = get_input() |> Enum.chunk_every(@width * @height)
+    layers_test = [
+      [0,2,2,2],
+      [1,1,2,2],
+      [2,2,1,2],
+      [0,0,0,0]
+    ]
+    result = layers
+    |> Enum.reduce(hd(layers), &layer_reducer/2)
+    |> Enum.chunk_every(@width)
+    |> Enum.map(fn l -> Enum.map(l, &(if &1==1, do: "#", else: " ")) |> Enum.join end) |> Enum.join("\r\n")
+    IO.puts(result)
   end
 
 end
