@@ -42,7 +42,7 @@ defmodule Intcode do
         runner(new_progr, pc + 4, options)
       3 -> # input
 
-        {i, new_options} = if Keyword.get(options, :input) do
+        {i, new_options} = if Keyword.get(options, :input) |> IO.inspect do
           {
             hd(Keyword.get(options, :input)),
             Keyword.update!(options, :input, &tl/1 )
