@@ -7,20 +7,27 @@ defmodule Intcode do
     get_modes(div(num, 10), Map.put(modes, idx+1, rem(num, 10)), idx+1)
   end
 
-  def get_param_value(progr, pc, modes, idx) do
-    if Map.get(modes, idx, 0) == 0 do
-      ptr = Map.get(progr, pc+idx)
-      Map.get(progr, ptr)
-    else
-      Map.get(progr, pc + idx)
+  def get_param_value(progr, pc, modes, rbase, idx) do
+
+    case Map.get(modes, idx, 0) do
+      0 ->
+        ptr = Map.get(progr, pc+idx)
+        Map.get(progr, ptr)
+      1 ->
+        Map.get(progr, pc + idx)
+      2 ->
+        z = Map.get(progr, pc + idx) + rbase
+        Map.get(progr, z)
+
     end
   end
 
   def runner(progr, pc, options \\ []) do
-    IO.puts("Starting runner with opts = #{options|>inspect}")
+    # IO.puts("Starting runner with opts = #{options|>inspect}")
     op_modes = progr |> Map.get(pc)
     op = get_op(op_modes)
     modes = get_modes(div(op_modes, 100), %{}, 0)
+    rbase = options |> Keyword.get(:rbase, 0)
 
     case op do
       99 -> # halt
@@ -28,8 +35,8 @@ defmodule Intcode do
         {Keyword.get(options, :output, []) |> Enum.reverse, progr}
 
       1 -> # add
-        p1 = get_param_value(progr, pc, modes, 1)
-        p2 = get_param_value(progr, pc, modes, 2)
+        p1 = get_param_value(progr, pc, modes, rbase, 1)
+        p2 = get_param_value(progr, pc, modes, rbase, 2)
         #p1 = Map.get(progr, pc + 1)
         #p2 = Map.get(progr, pc + 2)
         p3 = Map.get(progr, pc + 3)
@@ -37,8 +44,8 @@ defmodule Intcode do
         runner(new_progr, pc + 4, options)
 
       2 -> # mult
-        p1 = get_param_value(progr, pc, modes, 1)
-        p2 = get_param_value(progr, pc, modes, 2)
+        p1 = get_param_value(progr, pc, modes, rbase, 1)
+        p2 = get_param_value(progr, pc, modes, rbase, 2)
         p3 = Map.get(progr, pc + 3)
         new_progr = progr |> Map.put(p3, p1*p2)
         runner(new_progr, pc + 4, options)
@@ -68,30 +75,30 @@ defmodule Intcode do
           {:block, progr, pc, options}
         end
       4 -> # output
-        p1 = get_param_value(progr, pc, modes, 1)
+        p1 = get_param_value(progr, pc, modes, rbase, 1)
         IO.puts("OUTPUT : #{p1}")
 
         new_options = options |> Keyword.update(:output, [p1], &([p1 | &1]))
         runner(progr, pc + 2, new_options)
       5 -> # jump if true
-        p1 = get_param_value(progr, pc, modes, 1)
-        p2 = get_param_value(progr, pc, modes, 2)
+        p1 = get_param_value(progr, pc, modes, rbase, 1)
+        p2 = get_param_value(progr, pc, modes, rbase, 2)
         if p1 != 0 do
           runner(progr, p2, options)
         else
           runner(progr, pc + 3, options)
         end
       6 -> # jump if false
-        p1 = get_param_value(progr, pc, modes, 1)
-        p2 = get_param_value(progr, pc, modes, 2)
+        p1 = get_param_value(progr, pc, modes, rbase, 1)
+        p2 = get_param_value(progr, pc, modes, rbase, 2)
         if p1 == 0 do
           runner(progr, p2, options)
         else
           runner(progr, pc + 3, options)
         end
       7 -> # less than
-        p1 = get_param_value(progr, pc, modes, 1)
-        p2 = get_param_value(progr, pc, modes, 2)
+        p1 = get_param_value(progr, pc, modes, rbase, 1)
+        p2 = get_param_value(progr, pc, modes, rbase, 2)
         p3 = Map.get(progr, pc + 3)
 
         new_progr = if p1 < p2 do
@@ -101,8 +108,8 @@ defmodule Intcode do
         end
         runner(new_progr, pc + 4, options)
       8 -> # eq
-        p1 = get_param_value(progr, pc, modes, 1)
-        p2 = get_param_value(progr, pc, modes, 2)
+        p1 = get_param_value(progr, pc, modes, rbase, 1)
+        p2 = get_param_value(progr, pc, modes, rbase, 2)
         p3 = Map.get(progr, pc + 3)
 
         new_progr = if p1 == p2 do
@@ -111,6 +118,9 @@ defmodule Intcode do
           progr |> Map.put(p3, 0)
         end
         runner(new_progr, pc + 4, options)
+      9 -> # adjust relative base
+        p1 = get_param_value(progr, pc, modes, rbase, 1)
+        runner(progr, pc + 2, options |> Keyword.update(:rbase, p1, &(&1+p1)))
       end
   end
 
