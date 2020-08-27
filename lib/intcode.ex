@@ -11,20 +11,30 @@ defmodule Intcode do
 
     case Map.get(modes, idx, 0) do
       0 ->
-        ptr = Map.get(progr, pc+idx)
-        Map.get(progr, ptr)
+        ptr = Map.get(progr, pc+idx, 0)
+        Map.get(progr, ptr, 0)
       1 ->
-        Map.get(progr, pc + idx)
+        Map.get(progr, pc + idx, 0)
       2 ->
-        z = Map.get(progr, pc + idx) + rbase
-        Map.get(progr, z)
+        ptr = Map.get(progr, pc + idx , 0) + rbase
+        Map.get(progr, ptr, 0)
+
+    end
+  end
+
+  def get_out_param_ptr(progr, pc, modes, rbase, idx) do
+
+    case Map.get(modes, idx, 0) do
+      0 ->
+        Map.get(progr, pc+idx, 0)
+      2 ->
+        Map.get(progr, pc + idx , 0) + rbase
 
     end
   end
 
   def runner(progr, pc, options \\ []) do
-    # IO.puts("Starting runner with opts = #{options|>inspect}")
-    op_modes = progr |> Map.get(pc)
+    op_modes = progr |> Map.get(pc, 0)
     op = get_op(op_modes)
     modes = get_modes(div(op_modes, 100), %{}, 0)
     rbase = options |> Keyword.get(:rbase, 0)
@@ -39,14 +49,16 @@ defmodule Intcode do
         p2 = get_param_value(progr, pc, modes, rbase, 2)
         #p1 = Map.get(progr, pc + 1)
         #p2 = Map.get(progr, pc + 2)
-        p3 = Map.get(progr, pc + 3)
+        #p3 = Map.get(progr, pc + 3, 0)
+        p3 = get_out_param_ptr(progr, pc, modes, rbase, 3)
         new_progr = progr |> Map.put(p3, p1 + p2)
         runner(new_progr, pc + 4, options)
 
       2 -> # mult
         p1 = get_param_value(progr, pc, modes, rbase, 1)
         p2 = get_param_value(progr, pc, modes, rbase, 2)
-        p3 = Map.get(progr, pc + 3)
+        # p3 = Map.get(progr, pc + 3, 0)
+        p3 = get_out_param_ptr(progr, pc, modes, rbase, 3)
         new_progr = progr |> Map.put(p3, p1*p2)
         runner(new_progr, pc + 4, options)
       3 -> # input
@@ -65,9 +77,11 @@ defmodule Intcode do
               []
             }
           end
-          IO.puts("So i retr this input #{i}")
+          # IO.puts("So i retrieved this input #{i}")
 
-          p1 = Map.get(progr, pc + 1)
+          p1 = get_out_param_ptr(progr, pc, modes, rbase, 1 )
+          #p1 = Map.get(progr, pc + 1 + rbase, 0)
+
           new_progr = progr |> Map.put(p1, i)
           runner(new_progr, pc + 2, new_options)
         else
@@ -83,6 +97,7 @@ defmodule Intcode do
       5 -> # jump if true
         p1 = get_param_value(progr, pc, modes, rbase, 1)
         p2 = get_param_value(progr, pc, modes, rbase, 2)
+
         if p1 != 0 do
           runner(progr, p2, options)
         else
@@ -99,7 +114,7 @@ defmodule Intcode do
       7 -> # less than
         p1 = get_param_value(progr, pc, modes, rbase, 1)
         p2 = get_param_value(progr, pc, modes, rbase, 2)
-        p3 = Map.get(progr, pc + 3)
+        p3 = get_out_param_ptr(progr, pc, modes, rbase, 3)
 
         new_progr = if p1 < p2 do
           progr |> Map.put(p3, 1)
@@ -110,7 +125,7 @@ defmodule Intcode do
       8 -> # eq
         p1 = get_param_value(progr, pc, modes, rbase, 1)
         p2 = get_param_value(progr, pc, modes, rbase, 2)
-        p3 = Map.get(progr, pc + 3)
+        p3 = get_out_param_ptr(progr, pc, modes, rbase, 3)
 
         new_progr = if p1 == p2 do
           progr |> Map.put(p3, 1)
@@ -120,6 +135,7 @@ defmodule Intcode do
         runner(new_progr, pc + 4, options)
       9 -> # adjust relative base
         p1 = get_param_value(progr, pc, modes, rbase, 1)
+
         runner(progr, pc + 2, options |> Keyword.update(:rbase, p1, &(&1+p1)))
       end
   end
