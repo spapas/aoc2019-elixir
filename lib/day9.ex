@@ -6,8 +6,9 @@ defmodule Day9 do
     runner(new_prog, 0, input: [1])
   end
 
-  def day2b do
-
+  def day9b do
+    new_prog = read_program("day9.txt")
+    runner(new_prog, 0, input: [2])
   end
 end
 
