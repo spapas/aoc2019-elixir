@@ -28,22 +28,38 @@ defmodule Day10 do
     #oob = fn(x, y) ->
     #  x > w or x < 0 or y > h or y < 0
     #end
+  end
 
+  def location_sort(l, {px, py}) do
+    l|> Enum.sort_by(fn {x, y} -> abs(px-x)+abs(py-y) end )
+  end
 
-
+  def get_locations_tl({px, py}) when px == 0 and py==0, do: []
+  def get_locations_tl({px, py}=p) when py == 0 do
+    (for x <- (px-1)..0, do: {x, 0}) |> location_sort(p)
+  end
+  def get_locations_tl({px, py}=p) when px == 0 do
+    (for y <- (py-1)..0, do: {0, y}) |> location_sort(p)
+  end
+  def get_locations_tl({px, py}=p) do
+    (for x <- (px-1)..0, y <- (py-1)..0, do: {x, y}) |> location_sort(p)
   end
 
   def get_locations_around(grid, h, w, {px, py}) do
 
-
-    # TOP LEFT
-    (for x <- px..0, y <- py..0, do: {x, y}) |> Enum.sort_by(fn {x, y} -> abs(px-x)+abs(py-y) end ) |> IO.inspect
     # TOP RIGHT
-    (for x <- px..w, y <- py..0, do: {x, y}) |> Enum.sort_by(fn {x, y} -> abs(px-x)+abs(py-y) end )  |> IO.inspect
+    "TR"|>IO.puts
+    (for x <- px..(w-1), y <- (py-1)..0, do: {x, y}) |> Enum.sort_by(fn {x, y} -> abs(px-x)+abs(py-y) end )  |> IO.inspect
     # BOTTOM RIGHT
-    (for x <- px..w, y <- py..h, do: {x, y}) |> Enum.sort_by(fn {x, y} -> abs(px-x)+abs(py-y) end )  |> IO.inspect
+    "BR"|>IO.puts
+    (for x <- px..(w-1), y <- py..(h-1), do: {x, y}) |> Enum.sort_by(fn {x, y} -> abs(px-x)+abs(py-y) end )  |> IO.inspect
     # BOTTOM LEFT
-    (for x <- px..0, y <- py..h, do: {x, y}) |> Enum.sort_by(fn {x, y} -> abs(px-x)+abs(py-y) end )  |> IO.inspect
+    "BL"|>IO.puts
+    (for x <- (px-1)..0, y <- py..(h-1), do: {x, y}) |> Enum.sort_by(fn {x, y} -> abs(px-x)+abs(py-y) end )  |> IO.inspect
+    # TOP LEFT
+    "TL"|>IO.puts
+    (for x <- (px-1)..0, y <- (py-1)..0, do: {x, y}) |> Enum.sort_by(fn {x, y} -> abs(px-x)+abs(py-y) end ) |> IO.inspect
+    "~"
   end
 
 
