@@ -63,7 +63,7 @@ defmodule Intcode do
         runner(new_progr, pc + 4, options)
       3 -> # input
         the_input = Keyword.get(options, :input)
-        # IO.puts("Here's the input #{the_input|>inspect()}!")
+        IO.puts("Here's the input #{the_input|>inspect()}!")
         if Enum.count(the_input) > 0 do
           {i, new_options} = if the_input  do
             {
