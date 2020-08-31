@@ -8,11 +8,16 @@ defmodule Day10 do
 
   def read_test_input() do
     """
-    .#..#
-    .....
-    #####
-    ....#
-    ...##
+    ......#.#.
+    #..#.#....
+    ..#######.
+    .#.#.###..
+    .#..#.....
+    ..#....#.#
+    #..#....#.
+    .##.#..###
+    ##...#..#.
+    .#....####
     """ |> String.split() |> Enum.map( fn el ->
       el |> String.graphemes() |> Enum.map(&(if &1=="#", do: 1, else: 0))
     end)
@@ -129,26 +134,34 @@ defmodule Day10 do
     "~"
   end
 
+  def angle({x1,y1}, {x2, y2}) do
+    # {x1, y1, x2, y2} |> IO.inspect
+    :math.tan( (y2-y1) / (x2-x1))
+  end
+
   def asteroid_counter_quart(_p, _mapgrid, counter, []), do: counter
   def asteroid_counter_quart({x,y}=p, mapgrid, counter, [l={lx,ly}|rlocs]) do
     # mapgrid|>IO.inspect
     if Map.get(mapgrid, l) == 1 do
-      {"BEFORE", p, l, rlocs} |> IO.inspect
-      new_rlocs = rlocs |> Enum.reject(fn {rlx, rly} ->
-        dx = abs(lx - x)
-        dy = abs(ly - y)
-        {"X", rlx, lx, x, dx} |> IO.inspect
-        {"Y", rly, ly, y, dy} |> IO.inspect
-        cond do
-          #dx == 0 -> rem(rly, dy) !=0
-          #dy == 0 -> rem(rlx, dx) !=0
-          dx == 0 -> if rlx == lx, do: true, else: false
-          dy == 0 -> if rly == ly, do: true, else: false
-          true -> rem(rlx, dx) == 0 and rem(rly, dy) ==0
 
-        end |> IO.inspect
+      new_rlocs = rlocs |> Enum.reject(fn {rlx, rly} ->
+        dx = lx - x
+        drx = rlx - x
+
+        if dx == 0 do
+          drx == 0
+        else
+          if drx == 0 do
+            false
+          else
+            angle1 = angle({x, y}, {lx, ly})
+            angle2 = angle({x, y}, {rlx, rly})
+            angle1 == angle2
+          end
+        end
+
       end)
-      {"AFTER", p, l, new_rlocs} |> IO.inspect
+
       asteroid_counter_quart(p, mapgrid, counter+1, new_rlocs)
     else
       asteroid_counter_quart(p, mapgrid, counter, rlocs)
@@ -156,29 +169,29 @@ defmodule Day10 do
   end
 
   def day10 do
-    #grid = read_input()
-    grid = read_test_input()
+    grid = read_input()
+    # grid = read_test_input()
     h = grid |> Enum.count()
     w = grid |> Enum.at(0) |> Enum.count()
 
     mapgrid = get_map(grid)
     for y <- 0..w-1, x <- 0..h-1 do
       if Map.get(mapgrid, {x,y}) == 1 do
-        #tl_cnt = asteroid_counter_quart({x,y}, mapgrid, 0, get_locations_tl({x,y}, w, h))
-        #tr_cnt = asteroid_counter_quart({x,y}, mapgrid, 0, get_locations_tr({x,y}, w, h))
+        tl_cnt = asteroid_counter_quart({x,y}, mapgrid, 0, get_locations_tl({x,y}, w, h))
+        tr_cnt = asteroid_counter_quart({x,y}, mapgrid, 0, get_locations_tr({x,y}, w, h))
         br_cnt = asteroid_counter_quart({x,y}, mapgrid, 0, get_locations_br({x,y}, w, h))
-        #bl_cnt = asteroid_counter_quart({x,y}, mapgrid, 0, get_locations_bl({x,y}, w, h))
+        bl_cnt = asteroid_counter_quart({x,y}, mapgrid, 0, get_locations_bl({x,y}, w, h))
 
-        #r = tl_cnt + tr_cnt + br_cnt + bl_cnt
-        #{x, y, "TL", tl_cnt, "TR", tr_cnt , "BR", br_cnt , "BL", bl_cnt, "TOT", r}
-
-        # It has an asteroid so we'll count the asteroids around it
+        r = tl_cnt + tr_cnt + br_cnt + bl_cnt
+        {x, y, "TL", tl_cnt, "TR", tr_cnt , "BR", br_cnt , "BL", bl_cnt, "TOT", r}
+        r
 
       else
         {x, y, "-"}
+        0
       end
 
-    end
+    end |> Enum.max
 
   end
 
