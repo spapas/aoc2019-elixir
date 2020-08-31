@@ -34,14 +34,14 @@ defmodule Day11 do
     progr = read_program("day11.txt")
     grid = Map.new()
 
-    res = painter(grid, progr, 0, {{0, 0}, :up})
+    painter(grid, progr, 0, {{0, 0}, :up}) |> Map.keys() |> Enum.count()
 
 
   end
 
   def display(grid) do
-    for y <- -40..40 do
-      for x <- -40..100 do
+    for x <- -30..40 do
+      for y <- -55..15 do
         IO.write(
           case Map.get(grid, {x, y}) do
             0 -> "_"
@@ -55,11 +55,11 @@ defmodule Day11 do
     end
   end
 
-  def day11 do
+  def day11b do
     progr = read_program("day11.txt")
     grid = Map.new() |> Map.put({0,0}, 1)
 
-    res = painter(grid, progr, 0, {{0, 0}, :up})
+    painter(grid, progr, 0, {{0, 0}, :up})
 
   end
 end
