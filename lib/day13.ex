@@ -3,7 +3,8 @@ defmodule Day13 do
 
   def day13 do
     new_prog = read_program("day13.txt")
-    runner(new_prog, 0, input: [])
+    { output, _p } = runner(new_prog, 0, input: [])
+    output |> Enum.chunk_every(3) |> Enum.filter(fn [_a, _b, c] -> c == 2 end) |> Enum.count
   end
 
   def day13b do
