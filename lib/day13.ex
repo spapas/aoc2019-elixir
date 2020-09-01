@@ -12,30 +12,44 @@ defmodule Day13 do
     output |> Enum.chunk_every(3) |> Enum.filter(fn [_a, _b, c] -> c == 2 end) |> Enum.count
   end
 
+  def play_game(progr, pc, paddlex, options ) do
+    case runner(progr, pc, options) do
+      {:block, new_progr, new_pc, new_options} ->
+        output = Keyword.get(new_options, :output) |> IO.inspect |> Enum.reverse() |> Enum.chunk_every(3)
+        score = output |> Enum.filter(fn [x,y, _v] -> {-1, 0} == {x, y} end)
+        if Enum.count(score) > 0 do
+          IO.puts("SCORE IS #{inspect(score)}")
+        end
+        ball = output |> Enum.filter(fn [_x, _y, v] -> v == 4 end) |> List.last()
+        [ballx, _y, 4] = ball
+
+        paddle = output |> Enum.filter(fn [_x, _y, v] -> v == 3 end) |> List.last()
+
+        IO.puts("PADDLE IS ")
+        px = case paddle do
+          [new_paddlex, _y, 3] -> new_paddlex
+          _ -> paddlex
+        end |> IO.inspect
+
+        IO.puts("~~~~")
+        inp = cond do
+          px > ballx -> -1
+          px < ballx -> 1
+          px == ballx -> 0
+        end |> IO.inspect
+        {px, ballx, inp} |> IO.inspect
+        IO.puts("~~~~")
+
+        play_game(new_progr, new_pc, paddlex + px, (new_options |> Keyword.delete(:output) |> Keyword.put(:input, [inp])))
+
+      {output, _progr} -> output
+    end
+  end
+
   def day13b do
     progr = read_program("day13.txt") |> Map.put(0, 2)
-    {:block, progr, pc, options} = runner(progr, 0, input: [])
-    Keyword.get(options, :output) |> Enum.reverse() |> Enum.chunk_every(3) |> Enum.map(fn [x, y, v] -> {{x, y}, v} end ) |> Map.new |> display()
+    output = play_game(progr, 0, 0, input: [-1]) |> List.last
 
-    new_options = options|>Keyword.delete(:output)|>Keyword.put(:input, [-1])
-    {:block, progr, pc, options } = runner(progr, pc, new_options)
-    Keyword.get(options, :output) |> Enum.reverse() |> Enum.chunk_every(3) |> Enum.map(fn [x, y, v] -> {{x, y}, v} end ) |> Map.new |> display()
-
-    new_options = options|>Keyword.delete(:output)|>Keyword.put(:input, [1])
-    {:block, progr, pc, options } = runner(progr, pc, new_options)
-    Keyword.get(options, :output) |> Enum.reverse() |> Enum.chunk_every(3) |> Enum.map(fn [x, y, v] -> {{x, y}, v} end ) |> Map.new |> display()
-
-    new_options = options|>Keyword.delete(:output)|>Keyword.put(:input, [1])
-    {:block, progr, pc, options } = runner(progr, pc, new_options)
-    Keyword.get(options, :output) |> Enum.reverse() |> Enum.chunk_every(3) |> Enum.map(fn [x, y, v] -> {{x, y}, v} end ) |> Map.new |> display()
-
-    new_options = options|>Keyword.delete(:output)|>Keyword.put(:input, [1])
-    {:block, progr, pc, options } = runner(progr, pc, new_options)
-    Keyword.get(options, :output) |> Enum.reverse() |> Enum.chunk_every(3) |> Enum.map(fn [x, y, v] -> {{x, y}, v} end ) |> Map.new |> display()
-
-    new_options = options|>Keyword.delete(:output)|>Keyword.put(:input, [1])
-    {:block, progr, pc, options } = runner(progr, pc, new_options)
-    Keyword.get(options, :output) |> Enum.reverse() |> Enum.chunk_every(3) |> Enum.map(fn [x, y, v] -> {{x, y}, v} end ) |> Map.new |> display()
 
   end
 
