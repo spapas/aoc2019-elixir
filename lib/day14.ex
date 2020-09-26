@@ -8,9 +8,22 @@ defmodule Day14 do
 7 A, 1 E => 1 FUEL
 """
 
-def get_input() do
-  @input
-end
+  def get_queue() do
+    :queue.new
+  end
+
+  def push(q, v) do
+    :queue.in(v, q)
+  end
+
+  def pop(q) do
+    {{:value, v}, q} = :queue.out(q)
+    {v, q}
+  end
+
+  def get_input() do
+    @input
+  end
 
   def parse_input(input) do
     input |> String.split("\n") |> Enum.filter(&(&1!=""))
@@ -28,9 +41,18 @@ end
     end )
     [q, s] = r |> String.trim()
     |> String.split(" ")
-    {
-      rr,
-      {String.to_integer(q), s}
+    %{
+      l: rr,
+      r: {String.to_integer(q), s}
     }
   end
+
+  def get_rule(pinput, right) do
+    pinput |> Enum.filter(&(case &1 do
+      %{l: _, r: {_, ^right}} -> true
+      _ -> false
+    end))
+  end
+
+
 end
