@@ -44,4 +44,6 @@ defmodule Day4 do
   def day4b() do
     filter_numbers() |> Enum.filter(&(&1 |> to_list |> f3)) |> Enum.count()
   end
+
+
 end
