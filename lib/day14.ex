@@ -71,15 +71,18 @@ defmodule Day14 do
   end
 
   def get_next_states(state, minput) do
+    # Careful with the amts
+    # Problematic case:
+    # %{"A" => 28, "B" => 1}
     state |> Enum.map(fn {ingr, amt} ->
       if ingr == "ORE" do
-        state
+        []
       else
         %{amt: recipy_amt, l: ll }= minput |> Map.get(ingr)
-        mult =  round(amt / recipy_amt)
+        mult =  round(amt / recipy_amt) |> IO.inspect
 
         {_, s} = state |> Map.pop(ingr)
-        ll |> Map.merge(s, fn _k, v1, v2 -> mult * v1+v2 end)
+        ll |> Map.merge(s, fn _k, v1, v2 ->  mult*v1 + v2 end)
       end
     end)
   end
@@ -95,11 +98,11 @@ defmodule Day14 do
     else
       {curr, q} = pop(queue)
       if curr in visited do
-        "REVISIT"
+        bfs(visited, q, minput)
       else
         v2 = visited |> MapSet.put(curr)
         q2 = curr |> IO.inspect()
-        |> get_next_states(minput)
+        |> get_next_states(minput) |> IO.inspect
         |> Enum.reduce(q, &(push(&2, &1)))
         bfs(v2, q2, minput)
       end
