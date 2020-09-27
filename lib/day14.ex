@@ -21,6 +21,10 @@ defmodule Day14 do
     {v, q}
   end
 
+  def empty?(q) do
+    :queue.is_empty(q)
+  end
+
   def get_input() do
     @input
   end
@@ -37,8 +41,8 @@ defmodule Day14 do
     |> String.split(",")
     |> Enum.map( fn ll ->
       [q, s] = ll |> String.trim() |> String.split(" ")
-      {String.to_integer(q), s}
-    end )
+      {s, String.to_integer(q)}
+    end ) |> Map.new
     [q, s] = r |> String.trim()
     |> String.split(" ")
     %{
@@ -48,11 +52,60 @@ defmodule Day14 do
   end
 
   def get_rule(pinput, right) do
-    pinput |> Enum.filter(&(case &1 do
+    [hd | _ ] = pinput |> Enum.filter(&(case &1 do
       %{l: _, r: {_, ^right}} -> true
       _ -> false
     end))
+    hd
   end
+
+  def get_initial_state(pinput) do
+    %{ l: l, r: _} = get_rule(pinput, "FUEL")
+    l
+  end
+
+  def get_map_input(pinput) do
+    pinput |> Enum.map(fn %{l: l, r: {amt, ingr}} ->
+      {ingr, %{amt: amt, l: l}}
+     end) |> Map.new
+  end
+
+  def get_next_states(state, minput) do
+    state |> Enum.map(fn {ingr, amt} ->
+      if ingr == "ORE" do
+        state
+      else
+        %{amt: recipy_amt, l: ll }= minput |> Map.get(ingr)
+        mult =  round(amt / recipy_amt)
+
+        {_, s} = state |> Map.pop(ingr)
+        ll |> Map.merge(s, fn _k, v1, v2 -> mult * v1+v2 end)
+      end
+    end)
+  end
+
+  def init_queue(pinput) do
+    q = get_queue()
+    push(q, get_initial_state(pinput))
+  end
+
+  def bfs(visited, queue, minput) do
+    if empty?(queue) do
+      "OK"
+    else
+      {curr, q} = pop(queue)
+      if curr in visited do
+        "REVISIT"
+      else
+        v2 = visited |> MapSet.put(curr)
+        q2 = curr |> IO.inspect()
+        |> get_next_states(minput)
+        |> Enum.reduce(q, &(push(&2, &1)))
+        bfs(v2, q2, minput)
+      end
+    end
+  end
+
 
 
 end
