@@ -7,8 +7,22 @@ defmodule Day14 do
 7 A, 1 D => 1 E
 7 A, 1 E => 1 FUEL
 """
-
 @input """
+2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
+17 NVRVD, 3 JNWZP => 8 VPVL
+53 STKFG, 6 MNCFX, 46 VJHF, 81 HVMC, 68 CXFTF, 25 GNMV => 1 FUEL
+22 VJHF, 37 MNCFX => 5 FWMGM
+139 ORE => 4 NVRVD
+144 ORE => 7 JNWZP
+5 MNCFX, 7 RFSQX, 2 FWMGM, 2 VPVL, 19 CXFTF => 3 HVMC
+5 VJHF, 7 MNCFX, 9 VPVL, 37 CXFTF => 6 GNMV
+145 ORE => 6 MNCFX
+1 NVRVD => 8 CXFTF
+1 VJHF, 6 MNCFX => 4 RFSQX
+176 ORE => 6 VJHF
+"""
+
+@input1 """
 3 LMPDB, 11 CBTKP => 7 PZDPS
 5 CBKW, 4 CXBH => 9 KXNDF
 1 LVDN, 4 HGDHV => 1 PCXS
@@ -138,10 +152,10 @@ defmodule Day14 do
     # %{"A" => 28, "B" => 1}
     state |> Enum.map(fn {ingr, needed_amt} ->
       if ingr == "ORE" do
-        state
+        nil
       else
         %{amt: recipy_amt, l: ll }= minput |> Map.get(ingr)
-        mult =  ceil(needed_amt / recipy_amt)
+        mult = ceil(needed_amt / recipy_amt)
 
         {_, s} = state |> Map.pop(ingr)
         ll
@@ -176,6 +190,7 @@ defmodule Day14 do
         v2 = visited |> MapSet.put(curr)
         q2 = curr ##|> IO.inspect()
         |> get_next_states(minput) #|> IO.inspect()
+        |> Enum.filter( &(&1!=nil))
         |> Enum.reduce(q, &(push(&2, &1)))
         bfs(v2, q2, minput, a2)
       end
