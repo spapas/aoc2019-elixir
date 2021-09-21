@@ -1,13 +1,15 @@
 defmodule Day14 do
-  @input0 """
-10 ORE => 10 A
-1 ORE => 1 B
-7 A, 1 B => 1 C
-7 A, 1 C => 1 D
-7 A, 1 D => 1 E
-7 A, 1 E => 1 FUEL
+
+
+  @input00 """
+  10 ORE => 10 A
+  1 ORE => 1 B
+  7 A, 1 B => 1 C
+  7 A, 1 C => 1 D
+  7 A, 1 D => 1 E
+  7 A, 1 E => 1 FUEL
 """
-@input """
+@input0 """
 2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
 17 NVRVD, 3 JNWZP => 8 VPVL
 53 STKFG, 6 MNCFX, 46 VJHF, 81 HVMC, 68 CXFTF, 25 GNMV => 1 FUEL
@@ -22,7 +24,7 @@ defmodule Day14 do
 176 ORE => 6 VJHF
 """
 
-@input1 """
+@input """
 3 LMPDB, 11 CBTKP => 7 PZDPS
 5 CBKW, 4 CXBH => 9 KXNDF
 1 LVDN, 4 HGDHV => 1 PCXS
@@ -84,22 +86,6 @@ defmodule Day14 do
 1 PLGS, 7 TBKM => 8 LVDN
 """
 
-  def get_queue() do
-    :queue.new
-  end
-
-  def push(q, v) do
-    :queue.in(v, q)
-  end
-
-  def pop(q) do
-    {{:value, v}, q} = :queue.out(q)
-    {v, q}
-  end
-
-  def empty?(q) do
-    :queue.is_empty(q)
-  end
 
   def get_input() do
     @input
@@ -146,62 +132,74 @@ defmodule Day14 do
      end) |> Map.new
   end
 
-  def get_next_states(state, minput) do
-    # Careful with the amts
-    # Problematic case:
-    # %{"A" => 28, "B" => 1}
-    state |> Enum.map(fn {ingr, needed_amt} ->
-      if ingr == "ORE" do
-        nil
-      else
-        %{amt: recipy_amt, l: ll }= minput |> Map.get(ingr)
-        mult = ceil(needed_amt / recipy_amt)
+  def check_inventory(material, amount, inventory) do
+    inv_amt = Map.get(inventory, material, 0)
 
-        {_, s} = state |> Map.pop(ingr)
-        ll
-
-        |> Enum.map(fn {k, v} -> {k, v*mult} end)
-
-        |> Map.new
-        |> Map.merge(s, fn _k, v1, v2 ->  v1 + v2 end)
-      end
-    end)
-  end
-
-  def init_queue(pinput) do
-    q = get_queue()
-    push(q, get_initial_state(pinput))
-  end
-
-  def bfs(visited, queue, minput, acc) do
-    if empty?(queue) do
-      acc
+    if inv_amt >= amount do
+      {0, Map.put(inventory, material, inv_amt - amount)}
     else
-      {curr, q} = pop(queue)
-      if curr in visited do
-        bfs(visited, q, minput, acc)
-      else
-        curr |> Enum.count() # |> IO.inspect()
-        a2 = if curr |> Enum.count() == 1 do
-          [curr | acc]
-        else
-          acc
-        end
-        v2 = visited |> MapSet.put(curr)
-        q2 = curr ##|> IO.inspect()
-        |> get_next_states(minput) #|> IO.inspect()
-        |> Enum.filter( &(&1!=nil))
-        |> Enum.reduce(q, &(push(&2, &1)))
-        bfs(v2, q2, minput, a2)
-      end
+      # inv_amt < amount
+      {amount - inv_amt, Map.put(inventory, material, 0)}
     end
   end
 
+  def get_number_of_iterations(needed_amount,  recipe_amt) do
+    div(needed_amount,  recipe_amt) + 1 - if rem(needed_amount, recipe_amt) == 0, do: 1, else: 0
+  end
+
+  def calculate_cost("ORE", amount, inventory, _recipies), do: {amount, inventory}
+  def calculate_cost(material, amount, inventory, recipies) do
+    "#{material}, #{amount}"
+    inventory
+    {needed_amount, inventory} = check_inventory(material, amount, inventory)
+    inventory
+    if needed_amount > 0 do
+      %{amt: recipe_amt, l: recipe_ingredients} = Map.get(recipies, material)
+      number_of_iterations = get_number_of_iterations(needed_amount, recipe_amt)
+      produced = number_of_iterations * recipe_amt
+
+      inventory = Map.update(inventory, material, produced - needed_amount, fn existing ->
+        existing + produced - needed_amount
+      end)
+
+      Enum.reduce(recipe_ingredients, {0, inventory}, fn {m, a}, {acc_tot, acc_inv} ->
+        {c, i} = calculate_cost(m, a * number_of_iterations, acc_inv, recipies)
+        {acc_tot + c, i}
+      end)
+
+    else
+      {0, inventory}
+    end
+
+  end
+
+  def get_input_ok() do
+    pi = get_input() |> parse_input() |> get_map_input()
+  end
+
   def part1() do
-    pi = get_input() |> parse_input()
-    mi = pi |> get_map_input()
-    q = init_queue(pi)
-    bfs(MapSet.new, q, mi, []) |> Enum.min
+    mi = get_input_ok()
+    calculate_cost("FUEL", 1, %{}, mi)
+    # q = init_queue(pi)
+    # bfs(MapSet.new, q, mi, []) |> Enum.min
+
+  end
+
+  def search(n, mi) do
+    {cost, _inv} = calculate_cost("FUEL", n, %{}, mi)
+    {n, cost} |> IO.inspect
+    if cost > 1000000000000 do
+      {cost, n - 1}
+    else
+      search(n+1,mi)
+
+    end
+  end
+
+  def part2() do
+
+    mi = get_input_ok()
+    search(13100000, mi)
 
   end
 
