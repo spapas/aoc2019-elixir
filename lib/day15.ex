@@ -53,6 +53,7 @@ defmodule Day15 do
   def get_next_states(%{pos: pos, progr: progr, pc: pc, steps: steps}) do
     Enum.map([1,2,3,4], fn dir -> {step(progr, pc, dir), dir} end)
     |> Enum.filter(fn {{_progr, _pc, output}, _dir} -> output > 0 end)
+    |> IO.inspect
     |> Enum.map(fn {{progr1, pc1, output}, dir} -> %{
       pos: get_pos_by_direction(pos, dir),
       what: output,
@@ -68,25 +69,43 @@ defmodule Day15 do
   end
 
   def bfs(visited, queue, acc) do
-    if empty?(queue) do
+    #visited |> IO.inspect
+    #acc|> Enum.map(fn %{pos: pos, steps: steps} -> {pos, steps} end) |> IO.inspect |> IO.inspect
+    if empty?(queue)  do
       acc
     else
       {curr, q} = pop(queue)
+      pos = Map.get(curr, :pos)
+      old_steps = Map.get(visited, pos)
+      new_steps = Map.get(curr, :steps)
 
-      if Map.get(curr, :pos) in visited do
-        bfs(visited, q, acc)
+      {pos, "OLD", old_steps, "NEW", new_steps} |> IO.inspect
+
+      if old_steps == nil or old_steps > new_steps do
+        next_states = get_next_states(curr)
+
+        visited1 =  Map.put(visited, pos, new_steps)
+        queue1 =  Enum.reduce(next_states, q, &(push(&2, &1)))
+        #{old_steps, new_steps} |> IO.inspect
+        if old_steps != nil  do
+          #"OK"|> IO.inspect
+          #{old_steps, new_steps} |> IO.inspect
+          new_acc = Enum.filter(acc, &(Map.get(&1, :pos) != pos))
+          bfs(visited1, queue1, [curr | new_acc])
+          #bfs(visited1, queue1, [curr | acc])
+        else
+          bfs(visited1, queue1, [curr | acc])
+        end
       else
-        visited1 = MapSet.put(visited, Map.get(curr, :pos))
-        queue1 =  get_next_states(curr) |> Enum.reduce(q, &(push(&2, &1)))
+        bfs(visited, q, acc)
 
-        bfs(visited1, queue1, [curr | acc])
       end
     end
   end
 
   def map() do
 
-    bfs(MapSet.new(), init_queue(), [])
+    bfs(%{}, init_queue(), [])
   end
 
   def get_goal_pos(m) do
@@ -118,14 +137,11 @@ defmodule Day15 do
     map() |> Enum.filter(fn %{what: what} -> what == 2 end) |> Enum.at(0) |> Map.get(:steps)
   end
 
-  def part2a() do
-    map() |> Enum.max_by(fn %{steps: steps} -> steps end)
-  end
   def part2() do
     m = map()
     timer = 0
-    pos_oxygen = [{0, 0}]
-    tot_pos = Enum.map(m, &Map.get(&1, :pos)) |> Enum.filter(fn pos -> pos != {0, 0} end ) |> MapSet.new
+    pos_oxygen = [{12, 12}]
+    tot_pos = Enum.map(m, &Map.get(&1, :pos)) |> Enum.filter(fn pos -> pos != {12, 12} end ) |> MapSet.new
     #tot_pos = [
     #  {-1, 0}, {1, 0}, {-1, -1}, {1, -1}, {0, -2}, {-1, -2}, {2, -1}
     #] |> MapSet.new

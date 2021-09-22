@@ -63,7 +63,7 @@ defmodule Intcode do
         runner(new_progr, pc + 4, options)
       3 -> # input
         the_input = Keyword.get(options, :input)
-        IO.puts("Here's the input #{the_input|>inspect()}!")
+        # IO.puts("Here's the input #{the_input}!")
         if Enum.count(the_input) > 0 do
           {i, new_options} = if the_input  do
             {
@@ -85,12 +85,12 @@ defmodule Intcode do
           new_progr = progr |> Map.put(p1, i)
           runner(new_progr, pc + 2, new_options)
         else
-          IO.puts("Will block waiting ...")
+          #IO.puts("Will block waiting ...")
           {:block, progr, pc, options}
         end
       4 -> # output
         p1 = get_param_value(progr, pc, modes, rbase, 1)
-        IO.puts("OUTPUT : #{p1}")
+        #IO.puts("OUTPUT : #{p1}")
 
         new_options = options |> Keyword.update(:output, [p1], &([p1 | &1]))
         runner(progr, pc + 2, new_options)
