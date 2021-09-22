@@ -72,6 +72,7 @@ defmodule Day15 do
       acc
     else
       {curr, q} = pop(queue)
+
       if Map.get(curr, :pos) in visited do
         bfs(visited, q, acc)
       else
@@ -89,7 +90,7 @@ defmodule Day15 do
   end
 
   def get_goal_pos(m) do
-    m |> Enum.filter(fn %{what: what} -> what == 2 end) |> Enum.at(0) |> Map.get(:pos)
+    Enum.filter(m, fn %{what: what} -> what == 2 end) |> Enum.at(0) |> Map.get(:pos)
   end
 
   def print_spot({x, y}) do
