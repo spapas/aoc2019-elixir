@@ -96,4 +96,38 @@ defmodule Day17 do
     end) |> Enum.sum
   end
 
+  def part2_prepare(p) do
+    Map.put(p, 0, 2)
+  end
+
+  def part2() do
+    progr = part2_prepare(get_progr)
+    {:block, progr, pc, options} = runner(progr, 0, input: [])
+
+    Keyword.get(options, :output) |> Enum.reverse |> IO.puts
+    main = "A,B,B,C,B,C,B,C,A,A\n" |> String.to_charlist
+    {:block, progr, pc, options} = runner(progr, pc, Keyword.put(options, :input, main))
+    Keyword.get(options, :output) |> Enum.reverse |> IO.puts
+    funa = "L,6,R,8,L,4,R,8,L,12\n" |> String.to_charlist
+    {:block, progr, pc, options} = runner(progr, pc, Keyword.put(options, :input, funa ))
+    Keyword.get(options, :output) |> Enum.reverse |> IO.puts
+    funb = "L,12,R,10,L,4\n" |> String.to_charlist
+    {:block, progr, pc, options} = runner(progr, pc, Keyword.put(options, :input, funb ))
+    Keyword.get(options, :output) |> Enum.reverse |> IO.puts
+    func = "L,12,L,6,L,4,L,4\n" |> String.to_charlist
+    {:block, progr, pc, options} = runner(progr, pc, Keyword.put(options, :input, func ))
+    Keyword.get(options, :output) |> Enum.reverse |> IO.puts
+    yn = "y\n" |> String.to_charlist
+    {output, progr} = runner(progr, pc, Keyword.put(options, :input, yn ))
+    [h|t] = Enum.reverse(output)
+    h
+
+
+    #{:block, progr, pc, options} = runner(progr, pc, input: "L,1,R,2\n" |> String.to_charlist)
+    #{:block, progr, pc, options} = runner(progr, pc, input: "L,L,R\n" |> String.to_charlist)
+    #{:block, progr, pc, options} = runner(progr, pc, input: "L,L,R\n" |> String.to_charlist)
+    # {:block, progr, pc, options} = runner(progr, pc, input: "y\n" |> String.to_charlist)
+    # L,6,R,8,L,4,R,8,L,12,L,12,R,10,L,4,L,12,R,10,L,4,L,12,L,6,L,4
+  end
+
 end

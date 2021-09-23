@@ -38,8 +38,9 @@ defmodule Intcode do
     op = get_op(op_modes)
     modes = get_modes(div(op_modes, 100), %{}, 0)
     rbase = options |> Keyword.get(:rbase, 0)
-
+    #IO.puts("pc: #{pc}, op: #{op}")
     case op do
+
       99 -> # halt
         IO.puts("HALT")
         {Keyword.get(options, :output, []) |> Enum.reverse, progr}
