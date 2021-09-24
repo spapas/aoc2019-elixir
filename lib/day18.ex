@@ -188,7 +188,18 @@ defmodule Day18 do
     PQ.put(q, {0, st})
   end
 
-  def goal?(%{keys: keys}, key_num), do: Enum.count(keys) #|> IO.inspect == key_num
+  def init_queue3(mm, pos, keys) do
+    q = PQ.new()
+
+    PQ.put(q, {0, %{
+      pos: pos,
+      steps: 0,
+      keys: MapSet.new(keys)
+    }})
+  end
+
+
+  def goal?(%{keys: keys}, key_num), do: Enum.count(keys)  == key_num
 
   def bfs(visited, queue, acc, mm, key_number) do
 
@@ -196,8 +207,9 @@ defmodule Day18 do
       acc
     else
       {{w, curr}, q} = PQ.pop(queue)
-      #curr |> IO.inspect
+
       if goal?(curr, key_number) do
+
         curr
       else
         pos = Map.get(curr, :pos)
@@ -295,4 +307,50 @@ defmodule Day18 do
     |> elem(0)
     |> Kernel./(1_000_000)
   end
+
+  def get_keys2(mm) do
+    {
+      mm |>  Enum.filter( fn {{x,y}, v} -> v >= "a" and v <= "z" and x < 40 and y < 40 end) |> Enum.map(fn {p, v} -> v end),
+      mm |>  Enum.filter( fn {{x,y}, v} -> v >= "a" and v <= "z" and x > 40 and y < 40 end) |> Enum.map(fn {p, v} -> v end),
+      mm |>  Enum.filter( fn {{x,y}, v} -> v >= "a" and v <= "z" and x < 40 and y > 40 end) |> Enum.map(fn {p, v} -> v end),
+      mm |>  Enum.filter( fn {{x,y}, v} -> v >= "a" and v <= "z" and x > 40 and y > 40 end) |> Enum.map(fn {p, v} -> v end)
+    }
+  end
+
+  def get_doors2(mm) do
+    {
+      mm |>  Enum.filter( fn {{x,y}, v} -> v >= "A" and v <= "Z" and x < 40 and y < 40 end) |> Enum.map(fn {p, v} -> v end),
+      mm |>  Enum.filter( fn {{x,y}, v} -> v >= "A" and v <= "Z" and x > 40 and y < 40 end) |> Enum.map(fn {p, v} -> v end),
+      mm |>  Enum.filter( fn {{x,y}, v} -> v >= "A" and v <= "Z" and x < 40 and y > 40 end) |> Enum.map(fn {p, v} -> v end),
+      mm |>  Enum.filter( fn {{x,y}, v} -> v >= "A" and v <= "Z" and x > 40 and y > 40 end) |> Enum.map(fn {p, v} -> v end)
+    }
+  end
+
+  def part2_naive() do
+    mm = input_to_map(read_input2())
+
+    st1 = Enum.filter(mm, fn {{x,y}, v} -> v=="@" and x < 40 and y < 40   end) |> Enum.map(fn {p, _v} -> p end) |> Enum.at(0)
+    st2 = Enum.filter(mm, fn {{x,y}, v} -> v=="@" and x > 40 and y < 40   end) |> Enum.map(fn {p, _v} -> p end) |> Enum.at(0)
+    st3 = Enum.filter(mm, fn {{x,y}, v} -> v=="@" and x < 40 and y > 40   end) |> Enum.map(fn {p, _v} -> p end) |> Enum.at(0)
+    st4 = Enum.filter(mm, fn {{x,y}, v} -> v=="@" and x > 40 and y > 40   end) |> Enum.map(fn {p, _v} -> p end) |> Enum.at(0)
+    {k1, k2, k3, k4} = get_keys2(mm)
+
+    q1 = init_queue3(mm, st1, k2++k3++k4) |> IO.inspect
+    q2 = init_queue3(mm, st2, k1++k3++k4) |> IO.inspect
+    q3 = init_queue3(mm, st3, k1++k2++k4) |> IO.inspect
+    q4 = init_queue3(mm, st4, k1++k2++k3) |> IO.inspect
+    b1 = bfs(%{}, q1, [], mm, Enum.count(k1) ) |> IO.inspect
+
+    b2 = bfs(%{}, q2, [], mm, Enum.count(k2) )|> IO.inspect
+
+    b3 =bfs(%{}, q3, [], mm, Enum.count(k3) )|> IO.inspect
+
+    b4 = bfs(%{}, q4, [], mm, Enum.count(k4) )|> IO.inspect
+
+    (b1 |> Enum.at(0) |> Map.get( :steps)) +
+    (b2 |> Enum.at(0) |> Map.get( :steps)) +
+    (b3 |> Enum.at(0) |> Map.get( :steps)) +
+    (b4 |> Enum.at(0) |> Map.get( :steps))
+  end
+# 2972 too high
 end
