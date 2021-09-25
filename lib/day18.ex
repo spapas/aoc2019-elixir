@@ -329,6 +329,7 @@ defmodule Day18 do
   def part2_naive() do
     mm = input_to_map(read_input2())
 
+
     st1 = Enum.filter(mm, fn {{x,y}, v} -> v=="@" and x < 40 and y < 40   end) |> Enum.map(fn {p, _v} -> p end) |> Enum.at(0)
     st2 = Enum.filter(mm, fn {{x,y}, v} -> v=="@" and x > 40 and y < 40   end) |> Enum.map(fn {p, _v} -> p end) |> Enum.at(0)
     st3 = Enum.filter(mm, fn {{x,y}, v} -> v=="@" and x < 40 and y > 40   end) |> Enum.map(fn {p, _v} -> p end) |> Enum.at(0)
@@ -339,18 +340,18 @@ defmodule Day18 do
     q2 = init_queue3(mm, st2, k1++k3++k4) |> IO.inspect
     q3 = init_queue3(mm, st3, k1++k2++k4) |> IO.inspect
     q4 = init_queue3(mm, st4, k1++k2++k3) |> IO.inspect
-    b1 = bfs(%{}, q1, [], mm, Enum.count(k1) ) |> IO.inspect
+    b1 = bfs(%{}, q1, [], mm, 26 ) |> IO.inspect
 
-    b2 = bfs(%{}, q2, [], mm, Enum.count(k2) )|> IO.inspect
+    b2 = bfs(%{}, q2, [], mm, 26 )|> IO.inspect
 
-    b3 =bfs(%{}, q3, [], mm, Enum.count(k3) )|> IO.inspect
+    b3 =bfs(%{}, q3, [], mm, 26 )|> IO.inspect
 
-    b4 = bfs(%{}, q4, [], mm, Enum.count(k4) )|> IO.inspect
+    b4 = bfs(%{}, q4, [], mm, 26 )|> IO.inspect
 
-    (b1 |> Enum.at(0) |> Map.get( :steps)) +
-    (b2 |> Enum.at(0) |> Map.get( :steps)) +
-    (b3 |> Enum.at(0) |> Map.get( :steps)) +
-    (b4 |> Enum.at(0) |> Map.get( :steps))
+    (b1 |> Map.get( :steps)) +
+    (b2 |>  Map.get( :steps)) +
+    (b3 |>  Map.get( :steps)) +
+    (b4 |> Map.get( :steps))
   end
-# 2972 too high
+# 1514 too high
 end
