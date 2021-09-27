@@ -42,7 +42,7 @@ defmodule Day19 do
     width = get_output_for_point({x + 99, y})
     height = get_output_for_point({x , y+ 99})
 
-    case {width, height}
+    case {width, height} do
       {1, 1} -> {x, y}
       {1, 0} -> find_square_in_beam( x + 1, y)
       _ -> find_square_in_beam( x, y + 1)
