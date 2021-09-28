@@ -50,11 +50,15 @@ defmodule Day23 do
 
   def send_packet(idx, data, network, q, nat) do
     {progr, pc, options} = Map.get(network, idx)
-    {:block, progr, pc, options} = runner(progr, pc, Keyword.put(options, :input, data))
+
+    oo = Keyword.put(options, :input, data) |> Keyword.put(:output, [])
+
+    {:block, progr, pc, options} = runner(progr, pc, oo)
     network = Map.put(network, idx, {progr, pc, options})
     output = Keyword.get(options, :output, [])
     chunked_output = output |> Enum.reverse |> Enum.chunk_every(3)
-    nat = case Enum.filter(Enum.reverse(chunked_output), fn [a, x, y] -> a == 255 end) do
+    Enum.count(chunked_output) |> IO.inspect
+    nat = case Enum.filter(Enum.reverse(chunked_output), fn [a, x, y] -> a == 255 end) |> IO.inspect do
       [] -> nat
       [h|_t] -> h
     end
@@ -66,7 +70,7 @@ defmodule Day23 do
     if empty?(queue) do
       nat |> IO.inspect
 
-      send_packet(0, nat, network, queue, nil)
+      send_packet(0, nat, network, queue, nat)
 
     else
       {curr, q} = pop(queue)
