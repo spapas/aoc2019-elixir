@@ -13,6 +13,7 @@ defmodule Day25 do
 
         if input == 'qq\n' do
           "EXIT"
+          {progr, pc, options}
         else
           options = Keyword.put(options, :input, input)
 
@@ -21,10 +22,11 @@ defmodule Day25 do
       v ->
         IO.puts(elem(v, 0))
         IO.puts("TRY AGAIN")
-      input = IO.gets("> ") |> String.to_charlist
+        input = IO.gets("> ") |> String.to_charlist
 
         if input == 'qq\n' do
-          "EXIT"
+          "EXIT " |> IO.puts
+          {progr, pc, options}
         else
           options = Keyword.put(options, :input, input)
 
@@ -40,6 +42,9 @@ defmodule Day25 do
     play_loop(progr, pc, options)
   end
 
+  def resume(progr, pc, options) do
+    play_loop(progr, pc, options)
+  end
 
 
 
