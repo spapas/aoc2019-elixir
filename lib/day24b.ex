@@ -28,21 +28,22 @@ defmodule Day24b do
   end
 
   def get_adj_points({l, 0, 0}), do: [ {l-1, 1, 2}, {l-1, 2, 1}, {l, 1, 0}, {l, 0, 1} ]
-  def get_adj_points({l, 0, 4}), do: [ {l-1, 3, 2}, {l-1, 2, 1}, {l, 1, 4}, {l, 0, 3} ]
-  def get_adj_points({l, 4, 0}), do: [ {l-1, 2, 3}, {l-1, 1, 2}, {l, 4, 1}, {l, 3, 0} ]
+  def get_adj_points({l, 0, 4}), do: [ {l-1, 2, 3}, {l-1, 1, 2}, {l, 1, 4}, {l, 0, 3} ]
+  def get_adj_points({l, 4, 0}), do: [ {l-1, 3, 2}, {l-1, 2, 1}, {l, 4, 1}, {l, 3, 0} ]
   def get_adj_points({l, 4, 4}), do: [ {l-1, 2, 3}, {l-1, 3, 2}, {l, 4, 3}, {l, 3, 4} ]
-  def get_adj_points({l, 2, 3}), do: [ {l-1, 2, 3}, {l-1, 3, 2}, {l, 4, 3}, {l, 3, 4} ]
+
+  #def get_adj_points({l, 2, 3}), do: [ {l-1, 2, 3}, {l-1, 3, 2}, {l, 4, 3}, {l, 3, 4} ]
 
   def get_adj_points({l, 1, 2}), do: [ {l, 0, 2}, {l, 1, 1}, {l, 1, 3}, {l+1, 0, 0}, {l+1, 0, 1}, {l+1, 0, 2}, {l+1, 0, 3}, {l+1, 0, 4} ]
   def get_adj_points({l, 2, 1}), do: [ {l, 2, 0}, {l, 1, 1}, {l, 3, 1}, {l+1, 0, 0}, {l+1, 1, 0}, {l+1, 2, 0}, {l+1, 3, 0}, {l+1, 4, 0} ]
 
-  def get_adj_points({l, 2, 3}), do: [ {l, 2, 4}, {l, 1, 3}, {l, 3, 3}, {l+1, 0, 4}, {l+1, 1, 4}, {l+1, 2, 4}, {l+1, 3, 3}, {l+1, 3, 4} ]
-  def get_adj_points({l, 3, 2}), do: [ {l, 3, 1}, {l, 4, 2}, {l, 3, 3}, {l+1, 4, 0}, {l+1, 4, 1}, {l+1, 4, 2}, {l+1, 4, 3}, {l+1, 3, 3} ]
+  def get_adj_points({l, 2, 3}), do: [ {l, 2, 4}, {l, 1, 3}, {l, 3, 3}, {l+1, 0, 4}, {l+1, 1, 4}, {l+1, 2, 4}, {l+1, 3, 4}, {l+1, 4, 4} ]
+  def get_adj_points({l, 3, 2}), do: [ {l, 3, 1}, {l, 4, 2}, {l, 3, 3}, {l+1, 4, 0}, {l+1, 4, 1}, {l+1, 4, 2}, {l+1, 4, 3}, {l+1, 4, 4} ]
 
   def get_adj_points({l, 0, y}), do: [ {l-1, 1, 2}, {l, 0, y+1}, {l, 0, y-1}, {l, 1, y} ]
   def get_adj_points({l, 4, y}), do: [ {l-1, 3, 2}, {l, 4, y+1}, {l, 4, y-1}, {l, 3, y} ]
   def get_adj_points({l, x, 0}), do: [ {l-1, 2, 1}, {l, x+1, 0}, {l, x-1, 0}, {l, x, 1} ]
-  def get_adj_points({l, x, 4}), do: [ {l-1, 3, 2}, {l, x+1, 4}, {l, x-1, 4}, {l, x, 3} ]
+  def get_adj_points({l, x, 4}), do: [ {l-1, 2, 3}, {l, x+1, 4}, {l, x-1, 4}, {l, x, 3} ]
 
   def get_adj_points({l, x, y}), do: [ {l, x-1, y}, {l, x+1, y}, {l, x, y-1}, {l, x, y+1} ]
 
@@ -68,10 +69,10 @@ defmodule Day24b do
 
   def show_map(m, l) do
 
-    for y <- 0..5 do
-      for x <- 0..5 do
+    for y <- 0..4 do
+      for x <- 0..4 do
 
-          IO.write(Map.get(m, {l, x, y}))
+          IO.write(Map.get(m, {l, x, y}, "?"))
 
       end
 
@@ -87,15 +88,41 @@ defmodule Day24b do
 
   def part2_test() do
     test_input |> input_to_map
-    |> looper(1, 0)
+    |> looper(10, 0) |> Enum.filter(fn {{l, x, y}, v} -> v == "#" end) |> Enum.count()
 
   end
 
   def part2() do
-    #done = part1_loop(read_input |> input_to_map, MapSet.new)
-    #done |> show_map
-    #done |> part1_calc
+    read_input |> input_to_map
+    |> looper(200, 0) |> Enum.filter(fn {{l, x, y}, v} -> v == "#" end) |> Enum.count()
 
   end
 
 end
+
+" x,y
+   |     |         |     |
+0,0| 1,0 |  2,0    |3,0  |4,0
+   |     |         |     |
+---+-----+---------+-----+-----
+   |     |         |     |
+0,1| 1,1 |  2,1    |3,1  | 4,1
+   |     |         |     |
+---+-----+---------+-----+-----
+   |     |A|B|C|D|E|     |
+   |     |-+-+-+-+-|     |
+   |     |F|G|H|I|J|     |
+   |     |-+-+-+-+-|     |
+0,2| 1,2 |K|L|?|N|O| 3,2 |  4,2
+   |     |-+-+-+-+-|     |
+   |     |P|Q|R|S|T|     |
+   |     |-+-+-+-+-|     |
+   |     |U|V|W|X|Y|     |
+---+-----+---------+-----+-----
+   |     |         |     |
+0,3| 1,3 |   2,3   | 3,3 |  4,3
+   |     |         |     |
+---+-----+---------+-----+-----
+   |     |         |     |
+0,4|1,4  |  2,4    |  3,4|  4,4
+"
